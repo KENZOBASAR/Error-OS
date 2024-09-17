@@ -34,6 +34,12 @@ main_loop:
     cmp byte [si], 'x'   ; Check if command is 'exit'
     je exit_cmd
 
+    cmp byte [si], 'v'   ; Check if command is 'ver'
+    je version
+
+    cmp byte [si], 'd'   ; Check if command is 'disk'
+    je disk
+
     ; Invalid command
     mov si, invalid_cmd
     call print_string
@@ -45,7 +51,17 @@ show_help:
     jmp main_loop
 
 clear_screen_cmd:
-    mov si, clear_screen
+    mov ax, 0x03
+    int 0x10
+    jmp main_loop
+
+version:
+    mov si, versionname
+    call print_string
+    jmp main_loop
+
+disk:
+    mov si, diskname
     call print_string
     jmp main_loop
 
@@ -58,7 +74,7 @@ show_date:
 echo_cmd:
     ; Echo everything after 'echo '
     mov si, input_buffer
-    add si, 5            ; Skip the 'echo ' part
+    add si, 25            ; Skip the 'echo ' part
     mov di, si
     call print_string
     jmp main_loop
@@ -108,12 +124,11 @@ get_input:
 ; Data
 welcome_message db 'Welcome to Error OS', 0x0D, 0x0A, 0
 prompt          db 'erroros.command.user$> ', 0
-help_message    db 'Available commands: help, clear, echo, about, exit', 0x0D, 0x0A, 0
+help_message    db 'Available commands: help, clear, echo, about, exit, ver, disk', 0x0D, 0x0A, 0
 invalid_cmd     db 'Invalid command', 0x0D, 0x0A, 0
 clear_screen    db '[ ERROR ]: Clear screen command cannot be executed!', 0x0D, 0x0A, 0
 date_message    db 'Made by Kenzo Basar at 13/09/2024 08:28', 0x0D, 0x0A, 0
-
+versionname     db 'ErrorOS v2.0.0 [0.0.3]', 0x0D, 0x0A, 0
+diskname        db '[Drive 1]      [Floppy 1]', 0x0D, 0x0A, 0
+haltmessage     db '    It is now safe to power off your system', 0x0D, 0x0A, 0
 input_buffer    times 128 db 0   ; Buffer for user input
-
-times 510-($-$$) db 0    ; Fill remaining space
-dw 0xAA55                ; Boot sector signature
